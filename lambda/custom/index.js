@@ -3,32 +3,77 @@
 
 const Alexa = require('ask-sdk-core');
 
+const MESSAGES = {
+  skillName: "Tides Info"
+};
+
+const PERMISSIONS = ['alexa:devices:all:address:country_and_postal_code:read'];
+
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
-  handle(handlerInput) {
-    const speechText = 'Welcome to the Alexa Skills Kit, you can say hello!';
+  async handle(handlerInput) {
+
+    const {
+      requestEnvelope,
+      serviceClientFactory,
+      responseBuilder
+    } = handlerInput;
+
+    const consentToken = requestEnvelope.context.System.user.permissions &&
+      requestEnvelope.context.System.user.permissions.consentToken;
+    if (!consentToken) {
+      return responseBuilder
+        .speak('We need your permissions to access your post code, please have a look at the Alexa App')
+        .withAskForPermissionsConsentCard(PERMISSIONS)
+        .getResponse();
+    }
+    
+    const {
+      deviceId
+    } = requestEnvelope.context.System.device;
+    const deviceAddressServiceClient = serviceClientFactory.getDeviceAddressServiceClient();
+    const postcode = await deviceAddressServiceClient.getCountryAndPostalCode(deviceId);
+    //const address = await deviceAddressServiceClient.getFullAddress(deviceId);
+
+    console.log('Address successfully retrieved, now responding to user.', JSON.stringify(postcode));
+
+    const speechText = 'Welcome to the Tides Info skill, you can ask for low or high tides for today or tomorrow. What would you like to do? ' + postcode;
 
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt(speechText)
-      .withSimpleCard('Hello World', speechText)
+      .withSimpleCard(MESSAGES.skillName, speechText)
       .getResponse();
   },
 };
 
-const HelloWorldIntentHandler = {
+const LowTidesIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'HelloWorldIntent';
+      && handlerInput.requestEnvelope.request.intent.name === 'LowTidesIntent';
   },
   handle(handlerInput) {
-    const speechText = 'Hello World!';
+    const speechText = 'The next low tides today near you will be:';
 
     return handlerInput.responseBuilder
       .speak(speechText)
-      .withSimpleCard('Hello World', speechText)
+      .withSimpleCard(MESSAGES.skillName, speechText)
+      .getResponse();
+  },
+};
+const HighTidesIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'HighTidesIntent';
+  },
+  handle(handlerInput) {
+    const speechText = 'High tides tomorrow near you will be:';
+
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .withSimpleCard(MESSAGES.skillName, speechText)
       .getResponse();
   },
 };
@@ -39,12 +84,12 @@ const HelpIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
   },
   handle(handlerInput) {
-    const speechText = 'You can say hello to me!';
+    const speechText = 'You can ask for low or high tides for today or tomorrow. What would you like to do?';
 
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt(speechText)
-      .withSimpleCard('Hello World', speechText)
+      .withSimpleCard(MESSAGES.skillName, speechText)
       .getResponse();
   },
 };
@@ -60,7 +105,7 @@ const CancelAndStopIntentHandler = {
 
     return handlerInput.responseBuilder
       .speak(speechText)
-      .withSimpleCard('Hello World', speechText)
+      .withSimpleCard(MESSAGES.skillName, speechText)
       .getResponse();
   },
 };
@@ -95,10 +140,12 @@ const skillBuilder = Alexa.SkillBuilders.custom();
 exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
-    HelloWorldIntentHandler,
+    HighTidesIntentHandler,
+    LowTidesIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler
   )
   .addErrorHandlers(ErrorHandler)
+  .withApiClient(new Alexa.DefaultApiClient())
   .lambda();

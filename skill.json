@@ -2,14 +2,14 @@
   "manifest": {
     "publishingInformation": {
       "locales": {
-        "en-US": {
-          "summary": "Sample Short Description",
+        "en-GB": {
+          "summary": "Gives you low and high tides time based on your location",
           "examplePhrases": [
-            "Alexa open hello world",
-            "hello",
-            "help"
+            "Alexa open Tides Info",
+            "Alexa ask Tides Info when is low tide",
+            "Alexa ask Tides Info when is hight tide tomorrow"
           ],
-          "name": "Hello World",
+          "name": "Tides Info",
           "description": "Sample Full Description"
         }
       },
@@ -22,10 +22,14 @@
       "custom": {
         "endpoint": {
           "sourceDir": "lambda/custom",
-          "uri": "ask-custom-helloworld-default"
+          "uri": "arn:aws:lambda:eu-west-1:822055506908:function:ask-custom-Tides_Info-default"
         }
       }
     },
-    "manifestVersion": "1.0"
+    "manifestVersion": "1.0",
+    "permissions": [{
+      "name": "alexa:devices:all:address:country_and_postal_code:read"
+    }]
   }
+  
 }

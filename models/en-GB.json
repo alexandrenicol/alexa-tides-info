@@ -1,0 +1,41 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "tides info",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "HighTidesIntent",
+          "samples": [
+            "when is high tides",
+            "give me high tides",
+            "high tide",
+            "high tides",
+            "about high tide"
+          ]
+        },
+        {
+          "name": "LowTidesIntent",
+          "samples": [
+            "when is low tides",
+            "give me low tides",
+            "low tide",
+            "low tides",
+            "about low tide"
+          ]
+        }
+      ]
+    }
+  }
+}
